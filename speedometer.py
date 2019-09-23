@@ -3,12 +3,17 @@ class SpeedometerSolver:
 
     def __init__(self, filename):
         file = open(filename, "r")
+        # Load number of segments
         self.n = int(file.readline())
+        # Read total duration (in hours)
         self.T = int(file.readline())
+
+        # Load the vectors of distances (miles) and speeds (miles per hour)
         self.distances = list(map(int, file.readline().rstrip('\n').split()))
         self.speeds = list(map(int, file.readline().strip('\n').split()))
         file.close()
 
+        # Initialise sequence and convergence threshold
         self.c = []
         self.threshold = 1e-7
 
@@ -24,8 +29,10 @@ class SpeedometerSolver:
             s -= di / ((c + si)*(c + si))
         return s
 
+
     def test_solution(self, c):
         time = 0
+        # Iterate to sum the time of each segment traveled by Sheila applying correction c
         for di, si in zip(self.distances, self.speeds):
             time += di / (si + c)
         return self.T - time
@@ -40,6 +47,7 @@ class SpeedometerSolver:
 
         while True:
             i += 1;
+            # Apply iterative formula: ci+1 = ci - f(si)/f'(si)
             self.c.insert(i, self.c[i-1] - (self.solve_equation(self.c[i-1]) / self.solve_derivative(self.c[i-1])))
             print("Iteration {0} -> {1}".format(i, self.c[i]))
             if self.delta(i) < self.threshold:
@@ -60,5 +68,7 @@ class SpeedometerSolver:
 
 
 if __name__ == "__main__":
+    # instantiate the class taking the data inputs from the "input.txt"
     solver = SpeedometerSolver('input.txt')
-    solver.run(-0.4, threshold=1e-29)
+    # Set initial value for Newton's method 
+    solver.run(-0.1, threshold=1e-6)
